@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="horizontal" >
+
+    <LinearLayout
+        android:id="@+id/camera_preview"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:orientation="horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="720p"
+        android:textAllCaps="false"
+        android:id="@+id/buttonQuality"
+        android:layout_margin="5dp"/>
+
+    <Chronometer
+        android:id="@+id/textChrono"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="10dp"
+        android:textSize="20dp"
+        android:text="00:00"
+        android:visibility="gone"
+        android:textColor="@android:color/white"/>
+
+    <ImageView
+        android:id="@+id/chronoRecordingImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/player_record"
+        android:layout_toRightOf="@+id/textChrono"
+        android:layout_alignTop="@+id/textChrono"
+        android:layout_alignBottom="@+id/textChrono"
+        android:adjustViewBounds="true"
+        android:visibility="gone"
+        android:scaleType="fitStart" />
+
+    <ListView
+        android:id="@+id/listOfQualities"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/buttonQuality"
+        android:layout_margin="10dp"
+        android:visibility="gone"
+        android:background="@color/list_qualities_bg">
+
+    </ListView>
+
+    <LinearLayout
+        android:id="@+id/buttonsLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_alignParentRight="true"
+        android:orientation="vertical"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:weightSum="100"
+        android:background="@android:color/transparent"
+        >
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="33"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+
+            <ImageView
+                android:id="@+id/button_ChangeCamera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:maxWidth="80dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_camara_menu_switch"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="33"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/button_capture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:maxWidth="80dp"
+                android:src="@drawable/player_record" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="33"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <ImageView
+                android:id="@+id/buttonFlash"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="fitCenter"
+                android:maxHeight="60dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/ic_flash_off_white"/>
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
