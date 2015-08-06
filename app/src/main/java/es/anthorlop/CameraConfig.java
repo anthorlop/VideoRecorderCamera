@@ -1,7 +1,7 @@
 package es.anthorlop;
 
 /**
- * Created by antoniohormigo on 6/8/15.
+ * Created by anthorlop on 6/8/15.
  */
 public class CameraConfig {
 
