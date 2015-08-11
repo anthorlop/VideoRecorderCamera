@@ -18,17 +18,23 @@ package es.anthorlop.camera.activities;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -61,6 +67,10 @@ import es.anthorlop.camera.custom.CameraPreview;
  *
  */
 public class CameraActivity extends Activity {
+
+    private static final String TAG = "CameraActivity";
+
+    private static  final int FOCUS_AREA_SIZE= 500;
 
     private Camera mCamera;
     private CameraPreview mPreview;
@@ -104,24 +114,8 @@ public class CameraActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
-
-        if (recording) {
-            // stop recording and release camera
-            mediaRecorder.stop(); // stop the recording
-
-            if (chrono != null && chrono.isActivated())
-                chrono.stop();
-
-            File mp4 = new File(url_file);
-            if (mp4.exists() && mp4.isFile()) {
-                mp4.delete();
-            }
-
-            releaseMediaRecorder(); // release the MediaRecorder object
-            Toast.makeText(CameraActivity.this, "La grabación se ha detenido", Toast.LENGTH_LONG).show();
-            recording = false;
-        }
 
         ButterKnife.reset(this);
     }
@@ -233,6 +227,23 @@ public class CameraActivity extends Activity {
         buttonQuality.setOnClickListener(qualityListener);
 
         buttonFlash.setOnClickListener(flashListener);
+
+
+        cameraPreview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    try {
+                        focusOnTouch(event);
+                    } catch(Exception e){
+                        Log.i(TAG,"Fail when camera try autofocus");
+                    }
+                }
+                return true;
+            }
+        });
+
     }
 
     private void reloadQualities(int idCamera) {
@@ -652,6 +663,84 @@ public class CameraActivity extends Activity {
         flash = false;
         cameraFront = false;
     }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (recording) {
+            // stop recording and release camera
+            mediaRecorder.stop(); // stop the recording
+
+            if (chrono != null && chrono.isActivated())
+                chrono.stop();
+
+            releaseMediaRecorder(); // release the MediaRecorder object
+            Toast.makeText(CameraActivity.this, "La grabación se ha detenido", Toast.LENGTH_LONG).show();
+            recording = false;
+
+            File mp4 = new File(url_file);
+            if (mp4.exists() && mp4.isFile()) {
+                mp4.delete();
+            }
+        }
+
+        return super.onKeyDown(keyCode, event);
+    }
+
+    private void focusOnTouch(MotionEvent event) {
+        if (mCamera != null ) {
+
+            Camera.Parameters parameters = mCamera.getParameters();
+            if (parameters.getMaxNumMeteringAreas() > 0){
+                Log.i(TAG, "fancy !");
+                Rect rect = calculateFocusArea(event.getX(), event.getY());
+
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+                List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+                meteringAreas.add(new Camera.Area(rect, 800));
+                parameters.setFocusAreas(meteringAreas);
+
+                mCamera.setParameters(parameters);
+                mCamera.autoFocus(mAutoFocusTakePictureCallback);
+            }else {
+                mCamera.autoFocus(mAutoFocusTakePictureCallback);
+            }
+        }
+    }
+
+    private Rect calculateFocusArea(float x, float y) {
+        int left = clamp(Float.valueOf((x / mPreview.getWidth()) * 2000 - 1000).intValue(), FOCUS_AREA_SIZE);
+        int top = clamp(Float.valueOf((y / mPreview.getHeight()) * 2000 - 1000).intValue(), FOCUS_AREA_SIZE);
+
+        return new Rect(left, top, left + FOCUS_AREA_SIZE, top + FOCUS_AREA_SIZE);
+    }
+
+    private int clamp(int touchCoordinateInCameraReper, int focusAreaSize) {
+        int result;
+        if (Math.abs(touchCoordinateInCameraReper)+focusAreaSize/2>1000){
+            if (touchCoordinateInCameraReper>0){
+                result = 1000 - focusAreaSize/2;
+            } else {
+                result = -1000 + focusAreaSize/2;
+            }
+        } else{
+            result = touchCoordinateInCameraReper - focusAreaSize/2;
+        }
+        return result;
+    }
+
+    private Camera.AutoFocusCallback mAutoFocusTakePictureCallback = new Camera.AutoFocusCallback() {
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            if (success) {
+                // do something...
+                Log.i("tap_to_focus","success!");
+            } else {
+                // do something...
+                Log.i("tap_to_focus","fail!");
+            }
+        }
+    };
 
 }
 
